@@ -1,0 +1,324 @@
+diff --git a/index.html b/index.html
+new file mode 100644
+index 0000000..d8cc298
+--- /dev/null
++++ b/index.html
+@@ -0,0 +1,318 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++  <meta charset="UTF-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <title>Smart Crop Health Advisory</title>
++
++  <style>
++    /* ===== RESET ===== */
++    * {
++      box-sizing: border-box;
++      margin: 0;
++      padding: 0;
++    }
++
++    /* ===== PAGE BODY ===== */
++    body {
++      font-family: "Segoe UI", Arial, sans-serif;
++      /* Soft green background */
++      background-color: #e8f5e9;
++      color: #1b3a1b;
++      /* Center everything with Flexbox */
++      display: flex;
++      flex-direction: column;
++      align-items: center;
++      min-height: 100vh;
++      padding: 20px;
++    }
++
++    /* ===== CARD CONTAINER ===== */
++    .card {
++      background-color: #ffffff;
++      width: 100%;
++      max-width: 520px;
++      border-radius: 12px;
++      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
++      padding: 24px;
++    }
++
++    /* ===== HEADER ===== */
++    header {
++      text-align: center;
++      margin-bottom: 20px;
++    }
++
++    header h1 {
++      color: #2e7d32;
++      font-size: 26px;
++    }
++
++    header p {
++      color: #558b2f;
++      margin-top: 6px;
++      font-size: 14px;
++    }
++
++    /* ===== INPUT GROUPS ===== */
++    .input-group {
++      margin-bottom: 18px;
++    }
++
++    label {
++      display: block;
++      font-weight: bold;
++      margin-bottom: 6px;
++      color: #2e7d32;
++    }
++
++    select,
++    input[type="number"],
++    input[type="file"] {
++      width: 100%;
++      padding: 10px;
++      border: 1px solid #a5d6a7;
++      border-radius: 6px;
++      background-color: #f1f8e9;
++      font-size: 15px;
++      color: #1b3a1b;
++    }
++
++    /* ===== CHECKBOXES ===== */
++    .checkbox-group label {
++      display: flex;
++      align-items: center;
++      font-weight: normal;
++      color: #1b3a1b;
++      margin-bottom: 8px;
++      cursor: pointer;
++    }
++
++    .checkbox-group input[type="checkbox"] {
++      margin-right: 8px;
++      width: 16px;
++      height: 16px;
++    }
++
++    /* ===== BUTTON ===== */
++    button {
++      width: 100%;
++      padding: 12px;
++      background-color: #43a047;
++      color: #ffffff;
++      border: none;
++      border-radius: 6px;
++      font-size: 16px;
++      font-weight: bold;
++      cursor: pointer;
++      margin-top: 6px;
++    }
++
++    button:hover {
++      background-color: #2e7d32;
++    }
++
++    /* ===== OUTPUT SECTION (hidden by default) ===== */
++    .output-section {
++      display: none; /* hides until Diagnose is clicked */
++      margin-top: 20px;
++      padding: 16px;
++      background-color: #f1f8e9;
++      border: 1px solid #a5d6a7;
++      border-left: 5px solid #43a047;
++      border-radius: 6px;
++    }
++
++    .output-section h2 {
++      color: #2e7d32;
++      font-size: 18px;
++      margin-bottom: 10px;
++    }
++
++    .output-section p {
++      margin-bottom: 8px;
++      line-height: 1.5;
++    }
++
++    /* Special text for the pH warning (shown once) */
++    .ph-warning {
++      color: #c62828;
++      font-weight: bold;
++    }
++  </style>
++</head>
++
++<body>
++  <div class="card">
++
++    <!-- HEADER -->
++    <header>
++      <h1>Smart Crop Health Advisory</h1>
++      <p>Select the crop, symptoms, and soil details below.</p>
++    </header>
++
++    <!-- INPUT SECTION -->
++    <section>
++      <!-- Crop Type dropdown -->
++      <div class="input-group">
++        <label for="cropSelect">Crop Type</label>
++        <select id="cropSelect">
++          <option value="Tomato">Tomato</option>
++          <option value="Potato">Potato</option>
++        </select>
++      </div>
++
++      <!-- Symptoms checkboxes -->
++      <div class="input-group checkbox-group">
++        <label>Symptoms</label>
++        <label><input type="checkbox" class="symptom" value="Yellowing Leaves"> Yellowing Leaves</label>
++        <label><input type="checkbox" class="symptom" value="Brown Spots"> Brown Spots</label>
++        <label><input type="checkbox" class="symptom" value="Wilting"> Wilting</label>
++        <label><input type="checkbox" class="symptom" value="White Powder"> White Powder</label>
++      </div>
++
++      <!-- Soil pH number input -->
++      <div class="input-group">
++        <label for="phInput">Soil pH (0 to 14)</label>
++        <input type="number" id="phInput" min="0" max="14" step="0.1" placeholder="e.g. 6.5">
++      </div>
++
++      <!-- Dummy leaf photo upload -->
++      <div class="input-group">
++        <label for="leafPhoto">Upload Leaf Photo (optional)</label>
++        <input type="file" id="leafPhoto" accept="image/*">
++      </div>
++
++      <!-- Diagnose button -->
++      <button id="diagnoseButton">Diagnose</button>
++    </section>
++
++    <!-- OUTPUT SECTION (hidden by default) -->
++    <section class="output-section" id="outputSection">
++      <h2>Diagnosis Result</h2>
++      <p id="resultDisease"></p>
++      <p id="resultMatch"></p>
++      <p id="resultRemedy"></p>
++      <p id="resultPh"></p>
++    </section>
++
++  </div>
++
++  <script>
++    // ============================================
++    // CROP DATABASE
++    // A simple list of 3 plant diseases.
++    // Each object stores: crop, disease, required symptoms,
++    // optimal soil pH range (min & max), and a remedy text.
++    // ============================================
++    var cropDatabase = [
++      {
++        crop: "Tomato",
++        disease: "Early Blight",
++        symptoms: ["Brown Spots", "Yellowing Leaves"],
++        phMin: 6.0,
++        phMax: 6.8,
++        remedy: "Remove infected leaves and apply a copper-based fungicide."
++      },
++      {
++        crop: "Tomato",
++        disease: "Late Blight",
++        symptoms: ["Brown Spots", "Wilting"],
++        phMin: 6.0,
++        phMax: 7.0,
++        remedy: "Improve air circulation and apply a fungicide."
++      },
++      {
++        crop: "Potato",
++        disease: "Potato Scab",
++        symptoms: ["Brown Spots", "Yellowing Leaves"],
++        phMin: 5.0,
++        phMax: 6.0,
++        remedy: "Lower the soil pH and rotate crops each season."
++      }
++    ];
++
++    // ============================================
++    // DIAGNOSE FUNCTION
++    // Runs when the user clicks the Diagnose button.
++    // ============================================
++    function diagnose() {
++      // 1. Get the chosen crop from the dropdown.
++      var selectedCrop = document.getElementById("cropSelect").value;
++
++      // 2. Find all checked symptom boxes and collect their values.
++      var checkedSymptoms = [];
++      var symptomBoxes = document.querySelectorAll(".symptom");
++      for (var i = 0; i < symptomBoxes.length; i++) {
++        if (symptomBoxes[i].checked) {
++          checkedSymptoms.push(symptomBoxes[i].value);
++        }
++      }
++
++      // 3. Get the entered soil pH as a number.
++      var phValue = Number(document.getElementById("phInput").value);
++
++      // 4. Keep track of the best matching disease.
++      var bestDisease = null;
++      var bestPercent = 0;
++
++      // 5. Look through every disease in the database.
++      for (var j = 0; j < cropDatabase.length; j++) {
++        var currentDisease = cropDatabase[j];
++
++        // Only check diseases that belong to the selected crop.
++        if (currentDisease.crop === selectedCrop) {
++
++          // Count how many of this disease's required symptoms
++          // the user actually checked.
++          var matchCount = 0;
++          for (var k = 0; k < currentDisease.symptoms.length; k++) {
++            if (checkedSymptoms.indexOf(currentDisease.symptoms[k]) !== -1) {
++              matchCount++;
++            }
++          }
++
++          // Calculate a simple match percentage.
++          // Example: 2 matched out of 2 required = 100%.
++          var percent = Math.round((matchCount / currentDisease.symptoms.length) * 100);
++
++          // Remember the disease with the highest percentage.
++          if (percent > bestPercent) {
++            bestPercent = percent;
++            bestDisease = currentDisease;
++          }
++        }
++      }
++
++      // 6. Build the text to show in the output section.
++      var diseaseText = "Disease: " + bestDisease.disease;
++      var matchText = "Match: " + bestPercent + "%";
++      var remedyText = "Remedy: " + bestDisease.remedy;
++
++      // 7. Check if the soil pH is inside the plant's optimal range.
++      var phText = "";
++      if (phValue >= bestDisease.phMin && phValue <= bestDisease.phMax) {
++        phText = "Soil pH: " + phValue + " is within the ideal range.";
++      } else {
++        phText = "Warning: Soil pH " + phValue + " is NOT ideal. " +
++                 "Recommended range is " + bestDisease.phMin + " to " +
++                 bestDisease.phMax + ".";
++      }
++
++      // 8. Show the output section and fill in the results.
++      document.getElementById("resultDisease").textContent = diseaseText;
++      document.getElementById("resultMatch").textContent = matchText;
++      document.getElementById("resultRemedy").textContent = remedyText;
++      document.getElementById("resultPh").textContent = phText;
++
++      document.getElementById("outputSection").style.display = "block";
++    }
++
++    // ============================================
++    // CONNECT THE BUTTON TO THE FUNCTION
++    // ============================================
++    var diagnoseButton = document.getElementById("diagnoseButton");
++    diagnoseButton.addEventListener("click", diagnose);
++  </script>
++</body>
++</html>
