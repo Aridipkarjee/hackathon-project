@@ -1,0 +1,644 @@
+diff --git a/index.html b/index.html
+new file mode 100644
+index 0000000..5685f77
+--- /dev/null
++++ b/index.html
+@@ -0,0 +1,638 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++  <meta charset="UTF-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <title>AG-01: Smart Crop Health Platform</title>
++
++  <style>
++    /* ===== RESET: remove default spacing ===== */
++    * {
++      box-sizing: border-box;
++      margin: 0;
++      padding: 0;
++    }
++
++    /* ===== PAGE BODY ===== */
++    body {
++      font-family: "Segoe UI", Arial, sans-serif;
++      /* Light green background for a fresh, natural feel */
++      background-color: #e8f5e9;
++      color: #1b3a1b;
++      /* Flexbox: stack content vertically and center it */
++      display: flex;
++      flex-direction: column;
++      align-items: center;
++      min-height: 100vh;
++      padding: 20px;
++    }
++
++    /* ===== WHITE CARD CONTAINER ===== */
++    .card {
++      background-color: #ffffff;
++      width: 100%;
++      max-width: 540px;             /* nice width on desktop */
++      border-radius: 12px;
++      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
++      padding: 24px;
++    }
++
++    /* ===== HEADER (title left, language selector right) ===== */
++    header {
++      display: flex;
++      justify-content: space-between;   /* push the two parts apart */
++      align-items: center;              /* keep them vertically centered */
++      flex-wrap: wrap;                  /* allow stacking on small screens */
++      gap: 12px;
++      margin-bottom: 20px;
++    }
++
++    .header-title h1 {
++      color: #2e7d32;
++      font-size: 22px;
++      line-height: 1.3;
++    }
++
++    .header-title p {
++      color: #558b2f;
++      margin-top: 6px;
++      font-size: 13px;
++    }
++
++    /* Language selector sits at the top-right of the card */
++    .lang-control {
++      display: flex;
++      flex-direction: column;
++      min-width: 130px;
++    }
++
++    .lang-control label {
++      font-size: 13px;
++      margin-bottom: 4px;
++    }
++
++    .lang-control select {
++      padding: 7px;
++      border: 1px solid #a5d6a7;
++      border-radius: 6px;
++      background-color: #f1f8e9;
++      font-size: 14px;
++      color: #1b3a1b;
++    }
++
++    /* ===== INPUT GROUPS ===== */
++    .input-group {
++      margin-bottom: 16px;
++    }
++
++    label {
++      display: block;
++      font-weight: bold;
++      margin-bottom: 6px;
++      color: #2e7d32;
++    }
++
++    /* Make all form controls match the design */
++    select,
++    input[type="number"],
++    input[type="file"] {
++      width: 100%;
++      padding: 10px;
++      border: 1px solid #a5d6a7;
++      border-radius: 6px;
++      background-color: #f1f8e9;
++      font-size: 15px;
++      color: #1b3a1b;
++    }
++
++    /* Put the two number inputs side by side on wider screens */
++    .row {
++      display: flex;
++      gap: 12px;
++    }
++
++    .row .input-group {
++      flex: 1;   /* each input takes equal width */
++    }
++
++    /* ===== CHECKBOXES ===== */
++    .checkbox-group label {
++      display: flex;
++      align-items: center;
++      font-weight: normal;
++      color: #1b3a1b;
++      margin-bottom: 8px;
++      cursor: pointer;
++    }
++
++    .checkbox-group input[type="checkbox"] {
++      margin-right: 8px;
++      width: 16px;
++      height: 16px;
++    }
++
++    /* ===== BUTTONS ===== */
++    button {
++      width: 100%;
++      padding: 12px;
++      background-color: #43a047;
++      color: #ffffff;
++      border: none;
++      border-radius: 6px;
++      font-size: 16px;
++      font-weight: bold;
++      cursor: pointer;
++      margin-top: 6px;
++    }
++
++    button:hover {
++      background-color: #2e7d32;
++    }
++
++    /* ===== OUTPUT SECTION (hidden by default) ===== */
++    .output-section {
++      display: none;                     /* stays hidden until Diagnose is clicked */
++      margin-top: 20px;
++      padding: 16px;
++      background-color: #f1f8e9;
++      border: 1px solid #a5d6a7;
++      border-left: 5px solid #43a047;    /* green accent strip */
++      border-radius: 6px;
++    }
++
++    .output-section h2 {
++      color: #2e7d32;
++      font-size: 18px;
++      margin-bottom: 10px;
++    }
++
++    .output-section p {
++      margin-bottom: 8px;
++      line-height: 1.5;
++    }
++
++    /* Warning text uses red so it stands out */
++    .warning {
++      color: #c62828;
++      font-weight: bold;
++    }
++
++    /* ===== MOBILE FRIENDLY ===== */
++    @media (max-width: 500px) {
++      .row {
++        flex-direction: column;          /* stack inputs on small phones */
++      }
++      header {
++        flex-direction: column;          /* stack header on small phones */
++        align-items: flex-start;
++      }
++    }
++  </style>
++</head>
++
++<body>
++  <div class="card">
++
++    <!-- ===== HEADER: title + language selector (top right) ===== -->
++    <header>
++      <div class="header-title">
++        <h1 id="appTitle">AG-01: Smart Crop Health Platform</h1>
++        <p id="appSubtitle">Select a crop, tick the symptoms, and check the soil details.</p>
++      </div>
++
++      <div class="lang-control">
++        <label id="langLabel" for="languageSelect">Language</label>
++        <!-- Changing this dropdown re-renders every label/button/message -->
++        <select id="languageSelect">
++          <option value="en" selected>English</option>
++          <option value="hi">हिंदी</option>
++          <option value="bn">বাংলা</option>
++        </select>
++      </div>
++    </header>
++
++    <!-- ===== INPUT SECTION ===== -->
++    <section>
++
++      <!-- Crop Type dropdown -->
++      <div class="input-group">
++        <label for="cropSelect" id="cropLabel">Crop Type</label>
++        <select id="cropSelect">
++          <option value="Tomato" data-key="cropTomato">Tomato</option>
++          <option value="Rice" data-key="cropRice">Rice</option>
++          <option value="Potato" data-key="cropPotato">Potato</option>
++        </select>
++      </div>
++
++      <!-- Symptoms checkboxes -->
++      <div class="input-group checkbox-group">
++        <label id="symptomsLabel">Symptoms</label>
++        <label><input type="checkbox" class="symptom" value="yellowing"> <span id="lblYellowing">Yellowing Leaves</span></label>
++        <label><input type="checkbox" class="symptom" value="brownspots"> <span id="lblBrownSpots">Brown Spots</span></label>
++        <label><input type="checkbox" class="symptom" value="stemwilting"> <span id="lblStemWilting">Stem Wilting</span></label>
++        <label><input type="checkbox" class="symptom" value="whitepowder"> <span id="lblWhitePowder">White Powder</span></label>
++      </div>
++
++      <!-- Soil pH and Soil Moisture, side by side -->
++      <div class="row">
++        <div class="input-group">
++          <label for="phInput" id="phLabel">Soil pH (0-14)</label>
++          <input type="number" id="phInput" min="0" max="14" step="0.1" placeholder="6.5">
++        </div>
++
++        <div class="input-group">
++          <label for="moistureInput" id="moistureLabel">Soil Moisture %</label>
++          <input type="number" id="moistureInput" min="0" max="100" placeholder="40">
++        </div>
++      </div>
++
++      <!-- Dummy leaf photo upload -->
++      <div class="input-group">
++        <label for="leafPhoto" id="photoLabel">Upload Leaf Photo (optional)</label>
++        <input type="file" id="leafPhoto" accept="image/*">
++      </div>
++
++      <!-- Diagnose button -->
++      <button id="diagnoseButton">Diagnose Crop Health</button>
++    </section>
++
++    <!-- ===== OUTPUT SECTION (hidden until diagnosis) ===== -->
++    <section class="output-section" id="outputSection">
++      <h2 id="outputTitle">Diagnosis Result</h2>
++      <p id="resultDisease"></p>
++      <p id="resultConfidence"></p>
++      <p id="resultRemedy"></p>
++      <p id="resultPh"></p>
++      <p id="resultMoisture"></p>
++      <!-- Voice button reads the remedy out loud in the selected language -->
++      <button id="listenButton">🔊 Listen to Remedy</button>
++    </section>
++
++  </div>
++
++  <script>
++    // ================================================================
++    // LANGUAGE + TRANSLATIONS
++    // translations is a "data dictionary": for each language ('en',
++    // 'hi' and 'bn') it stores every UI label, heading, button text
++    // and message. We store simple strings and use {value} as a
++    // placeholder that we replace with the real number later.
++    // ================================================================
++    var translations = {
++      en: {
++        appTitle: "AG-01: Smart Crop Health Platform",
++        appSubtitle: "Select a crop, tick the symptoms, and check the soil details.",
++        langLabel: "Language",
++        cropLabel: "Crop Type",
++        cropTomato: "Tomato",
++        cropRice: "Rice",
++        cropPotato: "Potato",
++        symptomsLabel: "Symptoms",
++        symptomYellowing: "Yellowing Leaves",
++        symptomBrownSpots: "Brown Spots",
++        symptomStemWilting: "Stem Wilting",
++        symptomWhitePowder: "White Powder",
++        phLabel: "Soil pH (0-14)",
++        moistureLabel: "Soil Moisture %",
++        photoLabel: "Upload Leaf Photo (optional)",
++        diagnoseButton: "Diagnose Crop Health",
++        outputTitle: "Diagnosis Result",
++        diseaseLabel: "Identified Disease",
++        confidenceLabel: "Confidence Score",
++        remedyLabel: "Organic Remedy",
++        listenButton: "🔊 Listen to Remedy",
++        lowConfidence: " (Low confidence - try ticking more symptoms.)",
++        phGood: "Soil pH {value} is within the ideal range.",
++        phWarning: "Warning: Soil pH {value} is NOT ideal. Recommended range is {min} to {max}.",
++        phEnter: "Soil pH: Please enter a pH value.",
++        moistureText: "Soil Moisture: {value}%",
++        moistureEnter: "Soil Moisture: Please enter a value."
++      },
++      hi: {
++        appTitle: "AG-01: स्मार्ट फसल स्वास्थ्य मंच",
++        appSubtitle: "फसल चुनें, लक्षण चिह्नित करें, और मिट्टी की जानकारी दर्ज करें।",
++        langLabel: "भाषा",
++        cropLabel: "फसल का प्रकार",
++        cropTomato: "टमाटर",
++        cropRice: "धान",
++        cropPotato: "आलू",
++        symptomsLabel: "लक्षण",
++        symptomYellowing: "पत्तियों का पीला पड़ना",
++        symptomBrownSpots: "भूरे धब्बे",
++        symptomStemWilting: "तने का मुरझाना",
++        symptomWhitePowder: "सफेद पाउडर",
++        phLabel: "मिट्टी का pH (0-14)",
++        moistureLabel: "मिट्टी की नमी %",
++        photoLabel: "पत्ती की फोटो अपलोड करें (वैकल्पिक)",
++        diagnoseButton: "फसल स्वास्थ्य का निदान करें",
++        outputTitle: "निदान परिणाम",
++        diseaseLabel: "पहचाना गया रोग",
++        confidenceLabel: "विश्वास स्कोर",
++        remedyLabel: "जैविक उपचार",
++        listenButton: "🔊 उपचार सुनें",
++        lowConfidence: " (कम विश्वास - अधिक लक्षण चुनें।)",
++        phGood: "मिट्टी का pH {value} आदर्श सीमा में है।",
++        phWarning: "चेतावनी: मिट्टी का pH {value} आदर्श नहीं है। अनुशंसित सीमा {min} से {max} है।",
++        phEnter: "मिट्टी का pH: कृपया pH मान दर्ज करें।",
++        moistureText: "मिट्टी की नमी: {value}%",
++        moistureEnter: "मिट्टी की नमी: कृपया मान दर्ज करें।"
++      },
++      bn: {
++        appTitle: "AG-01: স্মার্ট ফসল স্বাস্থ্য প্ল্যাটফর্ম",
++        appSubtitle: "ফসল নির্বাচন করুন, লক্ষণ চিহ্নিত করুন, এবং মাটির তথ্য দিন।",
++        langLabel: "ভাষা",
++        cropLabel: "ফসলের ধরন",
++        cropTomato: "টমেটো",
++        cropRice: "ধান",
++        cropPotato: "আলু",
++        symptomsLabel: "লক্ষণসমূহ",
++        symptomYellowing: "পাতা হলদে হওয়া",
++        symptomBrownSpots: "বাদামী দাগ",
++        symptomStemWilting: "কাণ্ড শুকিয়ে যাওয়া",
++        symptomWhitePowder: "সাদা গুঁড়া",
++        phLabel: "মাটির pH (0-14)",
++        moistureLabel: "মাটির আর্দ্রতা %",
++        photoLabel: "পাতার ছবি আপলোড করুন (ঐচ্ছিক)",
++        diagnoseButton: "ফসলের স্বাস্থ্য নির্ণয় করুন",
++        outputTitle: "নির্ণয়ের ফলাফল",
++        diseaseLabel: "শনাক্তকৃত রোগ",
++        confidenceLabel: "আস্থা স্কোর",
++        remedyLabel: "জৈব প্রতিকার",
++        listenButton: "🔊 প্রতিকার শুনুন",
++        lowConfidence: " (কম আস্থা - আরও লক্ষণ নির্বাচন করুন।)",
++        phGood: "মাটির pH {value} আদর্শ সীমার মধ্যে আছে।",
++        phWarning: "সতর্কতা: মাটির pH {value} আদর্শ নয়। প্রস্তাবিত সীমা {min} থেকে {max}।",
++        phEnter: "মাটির pH: অনুগ্রহ করে pH মান লিখুন।",
++        moistureText: "মাটির আর্দ্রতা: {value}%",
++        moistureEnter: "মাটির আর্দ্রতা: অনুগ্রহ করে মান লিখুন।"
++      }
++    };
++
++    // Maps each language to the accent the device should speak in.
++    var speechLangCodes = {
++      en: "en-US",
++      hi: "hi-IN",
++      bn: "bn-IN"
++    };
++
++    // ================================================================
++    // CROP DATABASE (offline, hardcoded)
++    // Each disease stores:
++    //   crop      -> which crop it affects (used to filter candidates)
++    //   symptoms  -> the symptom "keys" that point to this disease
++    //   phMin/phMax -> the ideal soil pH range
++    //   name      -> the disease name, for each language
++    //   remedy    -> the organic remedy text, for each language
++    // ================================================================
++    var cropDatabase = [
++      {
++        crop: "Tomato",
++        symptoms: ["yellowing", "brownspots"],
++        phMin: 6.0,
++        phMax: 6.8,
++        name: { en: "Early Blight", hi: "अर्ली ब्लाइट", bn: "আর্লি ব্লাইট" },
++        remedy: {
++          en: "Clip off the infected leaves and spray a copper-based organic fungicide.",
++          hi: "संक्रमित पत्तियों को काट दें और कॉपर-आधारित जैविक फफूंदनाशक का छिड़काव करें।",
++          bn: "সংক্রমিত পাতা কেটে ফেলুন এবং কপার-ভিত্তিক জৈব ছত্রাকনাশক স্প্রে করুন।"
++        }
++      },
++      {
++        crop: "Tomato",
++        symptoms: ["whitepowder", "yellowing"],
++        phMin: 6.0,
++        phMax: 7.0,
++        name: { en: "Powdery Mildew", hi: "पाउडरी मिल्ड्यू", bn: "পাউডারি মিলডিউ" },
++        remedy: {
++          en: "Spray a mix of baking soda and water, and improve air flow around the plant.",
++          hi: "बेकिंग सोडा और पानी का मिश्रण छिड़कें और पौधे के चारों ओर हवा का प्रवाह बढ़ाएं।",
++          bn: "বেকিং সোডা ও পানির মিশ্রণ স্প্রে করুন এবং গাছের চারপাশে বাতাসের প্রবাহ বাড়ান।"
++        }
++      },
++      {
++        crop: "Rice",
++        symptoms: ["brownspots", "stemwilting"],
++        phMin: 5.5,
++        phMax: 6.5,
++        name: { en: "Rice Blast", hi: "राइस ब्लास्ट", bn: "রাইস ব্লাস্ট" },
++        remedy: {
++          en: "Reduce standing water and apply a rice-straw compost mix.",
++          hi: "जमा पानी कम करें और धान के पुआल की खाद मिलाएं।",
++          bn: "জমে থাকা পানি কমিয়ে দিন এবং ধানের খড়ের কম্পোস্ট মিশ্রণ প্রয়োগ করুন।"
++        }
++      },
++      {
++        crop: "Potato",
++        symptoms: ["yellowing", "brownspots"],
++        phMin: 5.0,
++        phMax: 6.0,
++        name: { en: "Potato Scab", hi: "आलू का स्कैब", bn: "আলুর স্ক্যাব" },
++        remedy: {
++          en: "Water evenly and mix in organic compost to keep the soil pH balanced.",
++          hi: "समान रूप से पानी दें और मिट्टी का pH संतुलित रखने के लिए जैविक खाद मिलाएं।",
++          bn: "সমানভাবে পানি দিন এবং মাটির pH ভারসাম্য রাখতে জৈব কম্পোস্ট মেশান।"
++        }
++      }
++    ];
++
++    // These track the latest result so we can re-render it in any language.
++    var currentLanguage = "en";     // the language selected in the dropdown
++    var latestDisease = null;       // the best matching disease object
++    var latestPercent = 0;          // the best confidence percentage
++    var latestPh = NaN;             // the last pH the user entered
++    var latestMoisture = NaN;       // the last moisture the user entered
++    var hasResult = false;          // true once a diagnosis is shown
++
++    // ================================================================
++    // UPDATE LANGUAGE FUNCTION (Dynamic UI Renderer)
++    // Reads the chosen language and rewrites every label, heading,
++    // button text and option so the whole page updates instantly.
++    // ================================================================
++    function updateLanguage() {
++      // 1. Find out which language is selected.
++      var lang = document.getElementById("languageSelect").value;
++      currentLanguage = lang;
++      var t = translations[lang];   // grab that language's dictionary
++
++      // 2. Update the page title (browser tab) and the header.
++      document.title = t.appTitle;
++      document.getElementById("appTitle").textContent = t.appTitle;
++      document.getElementById("appSubtitle").textContent = t.appSubtitle;
++
++      // 3. Update the language label.
++      document.getElementById("langLabel").textContent = t.langLabel;
++
++      // 4. Update the crop dropdown options.
++      var cropOptions = document.querySelectorAll("#cropSelect option");
++      for (var i = 0; i < cropOptions.length; i++) {
++        var key = cropOptions[i].getAttribute("data-key");
++        cropOptions[i].textContent = t[key];
++      }
++
++      // 5. Update the section labels and the symptom checkboxes.
++      document.getElementById("cropLabel").textContent = t.cropLabel;
++      document.getElementById("symptomsLabel").textContent = t.symptomsLabel;
++      document.getElementById("lblYellowing").textContent = t.symptomYellowing;
++      document.getElementById("lblBrownSpots").textContent = t.symptomBrownSpots;
++      document.getElementById("lblStemWilting").textContent = t.symptomStemWilting;
++      document.getElementById("lblWhitePowder").textContent = t.symptomWhitePowder;
++      document.getElementById("phLabel").textContent = t.phLabel;
++      document.getElementById("moistureLabel").textContent = t.moistureLabel;
++      document.getElementById("photoLabel").textContent = t.photoLabel;
++      document.getElementById("diagnoseButton").textContent = t.diagnoseButton;
++
++      // 6. Update the output section headings and the listen button.
++      document.getElementById("outputTitle").textContent = t.outputTitle;
++      document.getElementById("listenButton").textContent = t.listenButton;
++
++      // 7. If a diagnosis is already on screen, re-draw it in the new language.
++      if (hasResult) {
++        renderResult();
++      }
++    }
++
++    // ================================================================
++    // RENDER RESULT
++    // Builds the output text in the current language using the saved
++    // diagnosis data. Used by both diagnose() and updateLanguage().
++    // ================================================================
++    function renderResult() {
++      var t = translations[currentLanguage];
++
++      // Disease name and confidence score.
++      var diseaseText = t.diseaseLabel + ": " + latestDisease.name[currentLanguage];
++      var confidenceText = t.confidenceLabel + ": " + latestPercent + "%";
++      if (latestPercent === 0) {
++        confidenceText += t.lowConfidence;
++      }
++      var remedyText = t.remedyLabel + ": " + latestDisease.remedy[currentLanguage];
++
++      // Soil pH warning (checks whether the value is inside the range).
++      var phText;
++      if (isNaN(latestPh)) {
++        phText = t.phEnter;
++      } else if (latestPh >= latestDisease.phMin && latestPh <= latestDisease.phMax) {
++        // Replace the {value} placeholder with the real pH number.
++        phText = t.phGood.replace("{value}", latestPh);
++      } else {
++        phText = t.phWarning.replace("{value}", latestPh)
++                            .replace("{min}", latestDisease.phMin)
++                            .replace("{max}", latestDisease.phMax);
++      }
++
++      // Soil moisture display.
++      var moistureText;
++      if (isNaN(latestMoisture)) {
++        moistureText = t.moistureEnter;
++      } else {
++        moistureText = t.moistureText.replace("{value}", latestMoisture);
++      }
++
++      // Write everything into the output section.
++      document.getElementById("resultDisease").textContent = diseaseText;
++      document.getElementById("resultConfidence").textContent = confidenceText;
++      document.getElementById("resultRemedy").textContent = remedyText;
++      document.getElementById("resultPh").textContent = phText;
++      document.getElementById("resultMoisture").textContent = moistureText;
++    }
++
++    // ================================================================
++    // DIAGNOSE FUNCTION
++    // Runs when the user clicks "Diagnose Crop Health".
++    // ================================================================
++    function diagnose() {
++      // 1. Read the selected crop and the entered soil numbers.
++      var selectedCrop = document.getElementById("cropSelect").value;
++      var phValue = Number(document.getElementById("phInput").value);
++      var moistureValue = Number(document.getElementById("moistureInput").value);
++
++      // 2. Collect all checked symptom keys into an array.
++      var checkedSymptoms = [];
++      var symptomBoxes = document.querySelectorAll(".symptom");
++      for (var i = 0; i < symptomBoxes.length; i++) {
++        if (symptomBoxes[i].checked) {
++          checkedSymptoms.push(symptomBoxes[i].value);
++        }
++      }
++
++      // 3. Find the disease that matches the checked symptoms best.
++      var bestDisease = null;
++      var bestPercent = -1;   // start low so even 0% can beat it
++
++      for (var j = 0; j < cropDatabase.length; j++) {
++        var currentDisease = cropDatabase[j];
++
++        // Only look at diseases that affect the chosen crop.
++        if (currentDisease.crop === selectedCrop) {
++
++          // Count how many of this disease's required symptoms were ticked.
++          var matchCount = 0;
++          for (var k = 0; k < currentDisease.symptoms.length; k++) {
++            if (checkedSymptoms.indexOf(currentDisease.symptoms[k]) !== -1) {
++              matchCount++;
++            }
++          }
++
++          // Confidence = matched symptoms / all symptoms of the disease.
++          var percent = Math.round(
++            (matchCount / currentDisease.symptoms.length) * 100
++          );
++
++          // Keep the disease with the highest confidence.
++          if (percent > bestPercent) {
++            bestPercent = percent;
++            bestDisease = currentDisease;
++          }
++        }
++      }
++
++      // 4. Save the result so it can be re-rendered in any language.
++      latestDisease = bestDisease;
++      latestPercent = bestPercent;
++      latestPh = phValue;
++      latestMoisture = moistureValue;
++      hasResult = true;
++
++      // 5. Show and fill the output section in the current language.
++      document.getElementById("outputSection").style.display = "block";
++      renderResult();
++    }
++
++    // ================================================================
++    // LISTEN FUNCTION (Web Speech API / Voice Engine)
++    // Reads the remedy out loud using the browser's built-in speech.
++    // utterance.lang is picked from speechLangCodes so the device
++    // speaks the correct native accent for the selected language.
++    // ================================================================
++    function listenRemedy() {
++      // Make sure the browser supports speech.
++      if ("speechSynthesis" in window && latestDisease) {
++        var utterance = new SpeechSynthesisUtterance(
++          latestDisease.remedy[currentLanguage]
++        );
++        utterance.lang = speechLangCodes[currentLanguage];   // e.g. "hi-IN"
++        utterance.rate = 1;        // normal reading speed
++        window.speechSynthesis.speak(utterance);
++      } else {
++        // Fallback message (only shown if there is no result yet).
++        alert("Please run a diagnosis first.");
++      }
++    }
++
++    // ================================================================
++    // WIRE UP THE CONTROLS
++    // ================================================================
++    var languageSelect = document.getElementById("languageSelect");
++    languageSelect.addEventListener("change", updateLanguage);
++
++    var diagnoseButton = document.getElementById("diagnoseButton");
++    diagnoseButton.addEventListener("click", diagnose);
++
++    var listenButton = document.getElementById("listenButton");
++    listenButton.addEventListener("click", listenRemedy);
++
++    // Draw the default (English) labels on page load.
++    updateLanguage();
++  </script>
++</body>
++</html>
